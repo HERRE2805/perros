@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación de Imágenes con TensorFlow.js</title>
+    <link rel="stylesheet" href="estilo.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>CLASIFICADOR DE IMÁGENES AI</h1>
+    
+    <div class="upload-container">
+        <label for="upload" class="custom-upload">
+            ⚡ CARGAR IMAGEN
+        </label>
+        <input type="file" id="upload" accept="image/*">
+    </div>
+
+    <div id="preview-container">
+        <div class="scanline"></div>
+        <img id="preview" style="display: none;">
+    </div>
+
+    <p id="result"></p>
+
+    <script>
+        let model;
+
+        async function loadModel() {
+            model = await mobilenet.load();
+            console.log("Modelo cargado correctamente");
+        }
+
+        loadModel();
+
+        document.getElementById('upload').addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                const img = document.getElementById('preview');
+                img.src = URL.createObjectURL(file);
+                img.style.display = "block";
+
+                img.onload = async function() {
+                    const prediction = await model.classify(img);
+                    const resultElement = document.getElementById('result');
+                    resultElement.innerHTML = `
+                        🔮 Predicción: <span style="color: var(--neon-cyan)">${prediction[0].className}</span><br>
+                        📊 Confianza: <span style="color: var(--neon-pink)">${(prediction[0].probability * 100).toFixed(2)}%</span>
+                    `;
+                };
+            }
+        });
+    </script>
+</body>
+</html>
